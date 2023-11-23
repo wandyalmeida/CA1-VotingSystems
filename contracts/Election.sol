@@ -13,7 +13,7 @@ contract GameElection {
     uint public gamesCount;
 
     // Mapping to check the address that has been voting
-    mapping(address => bool) public voters;
+    mapping(uint => bool) public voters;
 
     // Function that implement the smart contract, and declare the games candidates for this voting system
     function Elections () public {
@@ -32,18 +32,22 @@ contract GameElection {
         games[gamesCount] = Game(gamesCount, _name, 0); //Getting games information and mapping them
     }
     // Function to allow people to vote and garante that is a valid ID
-    function vote (uint _gameId) public {
-        require(!voters[msg.sender]);// Check the voter isn't done
+    function vote (uint _voterId, uint _gameId) public returns (bool) {
+        if (voters[_voterId]) {
+            return false; // The voter has already voted, so we return false
+        }
         require(_gameId > 0 && _gameId <= gamesCount);
-        games[_gameId].voteCount ++;
-        voters[msg.sender] = true;//Record the vote of the address voter
+
+        games[_gameId].voteCount++;
+        voters[_voterId] = true;
+        return true; // The vote was successful, so we return true
     }
 
     //Function to return the results of the game with more votes or the winnig game
     function getResults() public view returns (string memory, uint) {
         uint maxVoteCount = 0;
         uint winningGameId = 0;
-        for (uint i = 0; i <= gamesCount; i++) {
+        for (uint i = 1; i <= gamesCount; i++) {
             if (games[i].voteCount > maxVoteCount) {
                 maxVoteCount = games[i].voteCount;
                 winningGameId = i;
